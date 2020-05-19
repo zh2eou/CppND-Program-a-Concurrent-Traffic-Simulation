@@ -62,8 +62,7 @@ TrafficLightPhase TrafficLight::getCurrentPhase()
 void TrafficLight::simulate()
 {
     // FP.2b : Finally, the private method „cycleThroughPhases“ should be started in a thread when the public method „simulate“ is called. To do this, use the thread queue in the base class. 
-    std::thread t(&TrafficLight::cycleThroughPhases, this);
-    t.join();
+    threads.emplace_back(std::thread(&TrafficLight::cycleThroughPhases));
 }
 
 // virtual function which is executed in a thread
@@ -74,8 +73,8 @@ void TrafficLight::cycleThroughPhases()
     // to the message queue using move semantics. The cycle duration should be a random value between 4 and 6 seconds. 
     // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms between two cycles. 
 
-    int randMin = 4000;
-    int randDiff = 2000;
+    int randMin = 4;
+    int randDiff = 2;
     int cycleLen;
     double timeDiff;
     time_t timer1;
@@ -85,12 +84,11 @@ void TrafficLight::cycleThroughPhases()
     time(&timer1); 
     time(&timer2);
 
+    // generate cycle time between 4 and 6 s
+    cycleLen = randMin + rand() % (randDiff + 1); 
     while (true) {
-        // generate cycle time between 4000 and 6000 ms
-        cycleLen = randMin + rand() % (randDiff + 1); 
-
         // keep polling timer2 until it reaches threshhold
-        if (int(difftime(timer1, timer2)) < cycleLen) {
+        if (int(difftime(timer2, timer1)) < cycleLen) {
             time(&timer2); 
         }
         else 
@@ -108,6 +106,8 @@ void TrafficLight::cycleThroughPhases()
 
             // reset timer1;
             time(&timer1);
+            // reset cycle
+            cycleLen = randMin + rand() % (randDiff + 1); 
             
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(1)); // sleep between cycles
