@@ -98,7 +98,7 @@ void TrafficLight::cycleThroughPhases()
                 _currentPhase = TrafficLightPhase::red;
             }
             else {
-                _currentPhase == TrafficLightPhase::green;
+                _currentPhase = TrafficLightPhase::green;
             }
             
             // send to phase change to message queue
